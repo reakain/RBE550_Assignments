@@ -1,0 +1,12 @@
+setup:
+5000x5000 4 connected grid
+start top left corner
+goal right bottom corner
+
+set some obstacles
+
+task and submission:
+python code with problem setup and search using DFS
+pdf report with graph solution cost vs time for different obstacle configurations
+
+submission type: .zip
