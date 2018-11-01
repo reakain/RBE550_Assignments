@@ -1,0 +1,12 @@
+You are tasked with the implementation of ANA*.
+
+You have been given a base_code and some example mazes (trivial.gif, medium.gif, hard.gif, very_hard.gif) to solve with your implemented search algorithm.  It is expected and required for you to provide some of your own searchable grid maps, in addition to those provided.
+
+You are to provide a brief analysis of the performance of each solution, containing, at a minimum, the solution cost vs time.
+
+Note:
+
+You can run the starting code with $ python main.py trivial.gif
+It is not necessarily plausible to solve all of the provided mazes with ANA*
+Your report quality will likely improve if you compare a more basic algorithm's performance against ANA*
+Submission: code & report in .zip file
