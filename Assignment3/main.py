@@ -2,7 +2,9 @@
 Assignment 3 Path planning
 
 """
-import random
+import random	# For generating obstacles
+
+# Generating a point definition
 class Vertex:
     def __init__(self,key):
         self.id = key
@@ -52,6 +54,7 @@ class Vertex:
         return self.predId
 
 
+# Graph class definition from a list of vertexess and edge connections
 class Graph(object):
     def __init__(self):
         self.vertList = {}
@@ -85,7 +88,8 @@ class Graph(object):
     def __iter__(self):
         return iter(self.vertList.values())
 
-
+		
+# Generate the DFS functional class definition
 class DFSGraph(Graph):
     def __init__(self):
         super(DFSGraph, self).__init__()
@@ -131,7 +135,7 @@ class DFSGraph(Graph):
                         yield new_path
 
 
-
+# Generate a grid from standard graph class
 def gridGraph(gridSize):
     gGraph = Graph()
     for row in range(gridSize):
@@ -143,6 +147,23 @@ def gridGraph(gridSize):
                gGraph.addEdge(nodeId,nid)
     return gGraph
 
+	
+# Generate the DFS graph with blocked points
+def blockGridGraph(gridSize, rowBlockNum):
+    gGraph = DFSGraph()
+    for row in range(gridSize):
+        blockCells = random.sample(xrange(1, gridSize-2), rowBlockNum)
+        for col in range(gridSize):
+            print(col)
+            if col not in blockCells:
+                nodeId = posToNodeId(row,col,gridSize)
+                newPositions = genNeighbors(row,col,gridSize,blockCells)
+                for e in newPositions:
+                    nid = posToNodeId(e[0],e[1],gridSize)
+                    gGraph.addEdge(nodeId,nid)
+    return gGraph
+	
+# Helper functions
 def posToNodeId(row, column, gridSize):
     return (row * gridSize) + column
 
@@ -164,19 +185,7 @@ def legalCoord(x,gridSize,blockCells=[]):
     else:
         return False
 
-def blockGridGraph(gridSize, rowBlockNum):
-    gGraph = DFSGraph()
-    for row in range(gridSize):
-        blockCells = random.sample(xrange(1, gridSize-2), rowBlockNum)
-        for col in range(gridSize):
-            print(col)
-            if col not in blockCells:
-                nodeId = posToNodeId(row,col,gridSize)
-                newPositions = genNeighbors(row,col,gridSize,blockCells)
-                for e in newPositions:
-                    nid = posToNodeId(e[0],e[1],gridSize)
-                    gGraph.addEdge(nodeId,nid)
-    return gGraph
+
 
 if __name__ == "__main__":
     try:
