@@ -1,0 +1,2 @@
+Solution 0 took 16204 loops to solve
+Solution 1 took 1939 loops to solve

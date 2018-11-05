@@ -3,6 +3,7 @@ from PIL import Image, ImageColor
 import copy
 from mapping import GridWithWeights
 from ana_search import ANAStarSearch
+from math import sqrt
 
 '''
 These variables are determined at runtime and should not be changed or mutated by you
@@ -60,10 +61,14 @@ def search(map):
 	im = Image.open(difficulty)
 
 	useMap = GridWithWeights(im.width,im.height)
+	h = {}
 	x = 0
 	y = 0
 	while x < useMap.width:
 		while y < useMap.height:
+			h[(x,y)] = sqrt((end[0]-x)**2 + (end[1]-y)**2)
+			if h[(x,y)] == 0:
+				h[(x,y)] = 0.0000000001
 			if map[x,y] != (255,255,255):
 				useMap.walls += {(x,y)}
 			y += 1
@@ -73,7 +78,7 @@ def search(map):
 	im.show()
 	im.close()
 	
-	runANA = ANAStarSearch(useMap, start, end, difficulty)
+	runANA = ANAStarSearch(useMap, start, end, difficulty, h)
 	runANA.StartSearch()
 
 	#visualize_search("out.png") # see what your search has wrought (and maybe save your results)
@@ -134,6 +139,18 @@ if __name__ == "__main__":
 	elif difficulty == "very_hard.gif":
 		start = (1, 324)
 		end = (580, 1)
+	elif difficulty == "maze_test1.gif":
+		start = (201, 58)
+		end = (1, 6)
+	elif difficulty == "maze_test2.gif":
+		start = (2, 1)
+		end = (41, 30)
+	elif difficulty == "maze_test3.gif":
+		start = (101, 74)
+		end = (101, 76)
+	elif difficulty == "maze_test4.gif":
+		start = (6, 1)
+		end = (24, 1)
 	else:
 		assert False, "Incorrect difficulty level provided"
 

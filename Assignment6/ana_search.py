@@ -1,13 +1,14 @@
 from mapping import PriorityQueue
 from PIL import Image
+import imageio
 
 class ANAStarSearch:
-	def __init__(self, graph, start, goal, mapFile):
+	def __init__(self, graph, start, goal, mapFile, h):
 		self.graph = graph
 		self.start = start
 		self.end = goal
 		self.preds = {}
-		self.h = 0.25
+		self.h = h
 		self.difficulty = mapFile
 
 	def StartSearch(self):
@@ -19,8 +20,13 @@ class ANAStarSearch:
 		self.g[self.start] = 0
 		self.OPEN = PriorityQueue()
 		self.preds = {}
+		self.solutions = {}
+		self.current_sol = -1
+		self.current_count = 0
+		images = []
+		images.append(imageio.imread(self.difficulty))
 		
-		self.e[self.start] = (self.G-self.g[self.start])/self.h
+		self.e[self.start] = (self.G-self.g[self.start])/self.h[self.start]
 		self.OPEN.put(self.start,self.e[self.start])
 		
 		while not self.OPEN.empty():
@@ -28,22 +34,35 @@ class ANAStarSearch:
 			self.frontier = {}
 			self.frontier.update({self.start:True})
 			self.expanded.update({self.start:True})
+			self.current_sol += 1
+			self.current_count = 0
 		
 			self.ImproveSolution()
-			self.visualize_search()
+			file = "out_"+self.difficulty.split('.')[0]+str(self.current_sol)+".gif"
+			self.visualize_search(file)
+			images.append(imageio.imread(file))
 			newOpen = PriorityQueue()
 			while not self.OPEN.empty():
 				s = self.OPEN.get()
-				if (self.g[s] + self.h < self.G):
+				if (self.g[s] + self.h[s] < self.G):
 					newOpen.put(s,self.e[s])
 			self.OPEN = newOpen
-		self.visualize_search("out.gif")
-	
+		self.visualize_search("out_"+self.difficulty)
+		images.append(imageio.imread("out_"+self.difficulty))
+		f = open("out_"+self.difficulty.split('.')[0]+".txt","w+")
+		for sol,counts in self.solutions.items():
+			f.write("Solution %d took %d loops to solve\r\n" % (sol, counts))
+		f.close()
+		
+		imageio.mimsave("movie_" + self.difficulty, images, duration=0.5)
+		
 	def ImproveSolution(self):
 		while not self.OPEN.empty():
 			s = self.OPEN.get()
 			self.expanded.update({s:True})
 			self.frontier.update({s:False})
+			self.solutions.update({self.current_sol:self.current_count})
+			self.current_count += 1
 
 			#if (self.e[s] < self.E):
 			#	self.E = self.e[s]
@@ -58,9 +77,9 @@ class ANAStarSearch:
 				if next not in self.g or new_g < self.g[next]:
 					self.g[next] = new_g
 					self.preds[next] = s
-					if self.g[next] + self.h < self.G:
-						self.e[next] = (self.G-self.g[next])/self.h
-						self.OPEN.put(next,self.e[next])						
+					if self.g[next] + self.h[next] < self.G and self.h[next] != 0:
+						self.e[next] = (self.G-self.g[next])/self.h[next]
+						self.OPEN.put(next,self.e[next])
 						
 	def GetPath(self, reverse = True, addStart = False):
 		current = self.end
@@ -94,12 +113,6 @@ class ANAStarSearch:
 		pixel_access = im.load()
 
 		# draw start and end pixels
-		pixel_access[start[0], start[1]] = NEON_GREEN
-		pixel_access[end[0], end[1]] = NEON_GREEN
-
-		# draw path pixels
-		for pixel in path:
-			pixel_access[pixel[0], pixel[1]] = PURPLE
 
 		# draw frontier pixels
 		for pixel in frontier.keys():
@@ -109,6 +122,13 @@ class ANAStarSearch:
 		for pixel in expanded.keys():
 			pixel_access[pixel[0], pixel[1]] = DARK_GRAY
 
+		# draw path pixels
+		for pixel in path:
+			pixel_access[pixel[0], pixel[1]] = PURPLE
+		
+		pixel_access[start[0], start[1]] = NEON_GREEN
+		pixel_access[end[0], end[1]] = NEON_GREEN
+		
 		# display and (maybe) save results
 		im.show()
 		if(save_file != "do_not_save.png"):
