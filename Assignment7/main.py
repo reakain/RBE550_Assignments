@@ -23,8 +23,8 @@ screen = pygame.display.set_mode(windowSize)
 white = 255, 255, 255
 black = 0, 0, 0
 red = 255, 0, 0
-blue = 0, 255, 0
-green = 0, 0, 255
+blue = 0, 0,255
+green = 0, 255, 0
 cyan = 0,180,105
 
 
@@ -160,7 +160,7 @@ def main():
 
 
 			while currNode.parent != None:
-				pygame.draw.line(screen,red,currNode.point,currNode.parent.point)
+				pygame.draw.line(screen,green,currNode.point,currNode.parent.point)
 				currNode = currNode.parent
 			optimizePhase = True
 		elif currentState == 'optimize':
@@ -188,18 +188,24 @@ def main():
 
 
 				newnode = step_from_to(parentNode.point,rand)
-				pygame.draw.line(screen,cyan,parentNode.point,newnode)
+
+                                if isStartTree:
+                                    pygame.draw.line(screen,red,parentNode.point,newnode)
+                                else:
+                                    pygame.draw.line(screen,blue,parentNode.point,newnode)
 
 				if isStartTree:
 					nodes_start.append(Node(newnode, parentNode))
 					if isReachedGoal(nodes_end,newnode,goalPoint):
 						currentState = 'goalFound'
+                                                pygame.draw.circle(screen, green, (int(newnode[0]),int(newnode[1])), GOAL_RADIUS)
 						goalNode = GetNodePath(nodes_start[len(nodes_start)-1], nodes_end, goalPoint)
 					isStartTree = False
 				else:
 					nodes_end.append(Node(newnode, parentNode))
 					if isReachedGoal(nodes_start,newnode,initialPoint):
 						currentState = 'goalFound'
+                                                pygame.draw.circle(screen, green, (int(newnode[0]),int(newnode[1])), GOAL_RADIUS)
 						goalNode = GetNodePath(nodes_end[len(nodes_end)-1], nodes_start, initialPoint)
 					isStartTree = True
 
@@ -232,7 +238,7 @@ def main():
 							goalPoint = Node(e.pos,None)
 							nodes_end.append(goalPoint)
 							goalPoseSet = True
-							pygame.draw.circle(screen, green, goalPoint.point, GOAL_RADIUS)
+							pygame.draw.circle(screen, blue, goalPoint.point, GOAL_RADIUS)
 							currentState = 'buildTree'
 				else:
 					currentState = 'init'
