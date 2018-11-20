@@ -1,0 +1,25 @@
+Individual Reading & Implementation Assignment - Bidirectional RRT*
+
+Paper (15 points)
+
+Read the following paper Dynamic_region_biased_rapidly_exploring_random_trees.pdf write a 1 page summary of the same
+
+ 
+
+Implementation (25 points)
+Implement bi-directional RRT* from scratch with a short writeup explaining your work
+
+Reference:
+
+Incremental_sampling_based_algorithm_for_optimal_motion_planning.pdf 
+https://www.youtube.com/watch?v=JeEk_CWcRFI&feature=youtu.be
+
+
+ 
+
+Submission: (code + writeup + summary) in a .zip file
+
+ 
+
+ 
+
