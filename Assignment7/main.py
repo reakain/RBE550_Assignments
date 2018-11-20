@@ -4,6 +4,10 @@ from pygame import *
 
 # Reference: https://raw.githubusercontent.com/s880367/RRT/master/rrt.py
 
+"""
+Initial code base listed in the reference above. Initial code was single standard RRT using pygame for visualization and touch interaction. Initial code maintained and expanded for bi-directional RRT using a swap on each node addition, and checking for collisions against other node list and goal or initial point. Code then generates node list path and visualizes.
+"""
+
 
 XDIM = 720
 YDIM = 500
