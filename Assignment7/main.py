@@ -23,8 +23,8 @@ screen = pygame.display.set_mode(windowSize)
 white = 255, 255, 255
 black = 0, 0, 0
 red = 255, 0, 0
-blue = 0, 255, 0
-green = 0, 0, 255
+green = 0, 255, 0
+blue = 0, 0, 255
 cyan = 0,180,105
 
 
@@ -90,12 +90,16 @@ def init_obstacles(configNum):  #initialized the obstacle
 		pygame.draw.rect(screen, black, rect)
 
 
-def ExpandTree(parentNode, rand, p):
-	if dist(p.point,rand) <= dist(parentNode.point,rand):
-		newPoint = step_from_to(p.point,rand)
-		if collides(newPoint) == False:
-			return True
-	return False
+def ExpandTree(nodesList, rand):
+	foundNext = False
+	parentNode = nodesList[0]
+	for p in nodesList:
+		if dist(p.point,rand) <= dist(parentNode.point,rand):
+			newPoint = step_from_to(p.point,rand)
+			if collides(newPoint) == False:
+				foundNext = True
+				parentNode = p
+	return (foundNext,parentNode)
 
 def TreeCollision(p,nodesList):
 	for node in nodesList:
@@ -112,16 +116,24 @@ def isReachedGoal(nodesList,p,rootNode):
 		return False
 		
 def GetNodePath(lastNode,nodesList,rootNode):
+	# Collision occurred at goal or start point
 	if point_circle_collision(lastNode.point, rootNode.point, GOAL_RADIUS):
 		return lastNode
+	# Collision occurred between trees
 	else:
-		nodes_path = []
+		# Draw the node where collision was found
+		print(lastNode.point)
+		pygame.draw.circle(screen, green, [int(lastNode.point[0]),int(lastNode.point[1])], GOAL_RADIUS)
+		
+		# Build new node path set for drawing goal path
+		# Find the node in the tree that connects to the collision node (lastNode)
 		connectNode = GetConnectionNode(lastNode,nodesList)
-		nodes_path.append(Node(connectNode.point,lastNode))
+		# Build "first" point in expanded tree, building out from the collision node
+		newNode = Node(connectNode.point,lastNode)
 		while connectNode.parent != None:
 			connectNode = connectNode.parent
-			nodes_path.append(Node(connectNode.point, nodes_path[len(nodes_path)-1]))
-		return nodes_path[len(nodes_path)-1]
+			newNode = Node(connectNode.point, newNode)
+		return newNode
 				
 def GetConnectionNode(lastNode,nodesList):
 	for node in nodesList:
@@ -160,7 +172,7 @@ def main():
 
 
 			while currNode.parent != None:
-				pygame.draw.line(screen,red,currNode.point,currNode.parent.point)
+				pygame.draw.line(screen,green,currNode.point,currNode.parent.point)
 				currNode = currNode.parent
 			optimizePhase = True
 		elif currentState == 'optimize':
@@ -174,35 +186,34 @@ def main():
 				while foundNext == False:
 					rand = get_random_clear()
 					if isStartTree:
-						parentNode = nodes_start[0]
-						for p in nodes_start:
-							if ExpandTree(parentNode,rand,p):
-								foundNext = True
-								parentNode = p
+						result = ExpandTree(nodes_start,rand)
 					else:
-						parentNode = nodes_end[0]
-						for p in nodes_end:
-							if ExpandTree(parentNode,rand,p):
-								foundNext = True
-								parentNode = p
+						result = ExpandTree(nodes_end,rand)
+					
+					foundNext = result[0]
+					parentNode = result[1]
 
-
-				newnode = step_from_to(parentNode.point,rand)
-				pygame.draw.line(screen,cyan,parentNode.point,newnode)
+				newnode_p = step_from_to(parentNode.point,rand)
+				newNode = Node(newnode_p, parentNode)
 
 				if isStartTree:
-					nodes_start.append(Node(newnode, parentNode))
-					if isReachedGoal(nodes_end,newnode,goalPoint):
-						currentState = 'goalFound'
-						goalNode = GetNodePath(nodes_start[len(nodes_start)-1], nodes_end, goalPoint)
+					nodes_start.append(newNode)
+					color = red
+					nodesList = nodes_end
+					rootNode = goalPoint
 					isStartTree = False
 				else:
-					nodes_end.append(Node(newnode, parentNode))
-					if isReachedGoal(nodes_start,newnode,initialPoint):
-						currentState = 'goalFound'
-						goalNode = GetNodePath(nodes_end[len(nodes_end)-1], nodes_start, initialPoint)
+					nodes_end.append(newNode)
+					color = blue
+					nodesList = nodes_start
+					rootNode = initialPoint
 					isStartTree = True
-
+					
+				if isReachedGoal(nodesList,newNode.point,rootNode):
+					currentState = 'goalFound'
+					goalNode = GetNodePath(newNode, nodesList, rootNode)
+				pygame.draw.line(screen,color,parentNode.point,newNode.point)
+				
 			else:
 				print("Ran out of nodes... :(")
 				return;
@@ -232,7 +243,7 @@ def main():
 							goalPoint = Node(e.pos,None)
 							nodes_end.append(goalPoint)
 							goalPoseSet = True
-							pygame.draw.circle(screen, green, goalPoint.point, GOAL_RADIUS)
+							pygame.draw.circle(screen, blue, goalPoint.point, GOAL_RADIUS)
 							currentState = 'buildTree'
 				else:
 					currentState = 'init'
